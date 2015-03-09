@@ -1,0 +1,74 @@
+body {
+    background-color: #EFFCEB;
+}
+
+table {
+    border-collapse: collapse;
+    margin-top: 1em;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
+td {
+    padding: 4px;
+}
+
+div.panel {
+    margin-top: 1em;
+}
+
+
+#container {
+    width: 816px;
+    margin: 0 auto;
+}
+
+.question {
+    font-size: 200%;
+    text-align: center;
+}
+
+.mistakes {
+    color: red;
+    font-weight: bold;
+}
+
+.correct {
+    color: blue;
+    font-weight: bold;
+}
+
+#map {
+    background-color: #E8F5FD;
+    margin-top: 1em;
+    margin-: 1em;
+}
+
+#region {
+    margin-left: 1em;
+}
+
+#cur_pos {
+    margin-left: 1em;
+}
+
+table.prefs-table {
+    width: 800;
+    background-color: #FFF;
+    border: 2px solid black;
+}
+
+td.td-pref-no {
+    text-align: right;
+}
+
+td.td-pref {
+    width: 4em;
+}
+
+td.td-result {
+    width: 3em;
+    border-right: 2px solid black;
+}
