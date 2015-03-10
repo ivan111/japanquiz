@@ -43,7 +43,8 @@
             { label: "近畿", idRange: [ 24, 30 ] },
             { label: "中国", idRange: [ 31, 35 ] },
             { label: "四国", idRange: [ 36, 39 ] },
-            { label: "九州・沖縄", idRange: [ 40, 47 ] }
+            { label: "九州・沖縄", idRange: [ 40, 47 ] },
+            { label: "練習", idRange: [ 1, 0 ] }
         ],
 
         prefCenter = [ [ 0, 0 ] ],
@@ -361,10 +362,10 @@
 
 
     function clickGeography(geo, quiz) {
-        var i, x, y, kana, answerID, result, name;
+        var i, x, y, kana, answerID, result;
 
         if (quiz.curPos >= quiz.prefsNum) {
-            quiz.d3.msg.text( prefTbl[geo.id].name );
+            quiz.d3.msg.text(quiz.getName(geo.id));
 
             return;
         }
@@ -409,13 +410,7 @@
 
             quiz.nextQuestion();
         } else {
-            if (quiz.mode === MODE_PREF) {
-                name = prefTbl[geo.id].name;
-            } else {
-                name = prefTbl[geo.id].capital;
-            }
-
-            quiz.d3.msg.text(" そこは " + name);
+            quiz.d3.msg.text(" そこは " + quiz.getName(geo.id));
 
             quiz.bso.s++;
             result.html(result.html() + "<span class=\"mistakes\">X</span>");
@@ -633,8 +628,6 @@
 
 
     JapanQuiz.prototype.nextQuestion = function () {
-        var name;
-
         this.curPos++;
 
         if (this.curPos > this.prefsNum) {
@@ -642,7 +635,11 @@
         }
 
         if (this.curPos === this.prefsNum) {
-            this.d3.q.text("試合終了");
+            if (this.prefsNum === 0) {
+                this.d3.q.text("");
+            } else {
+                this.d3.q.text("試合終了");
+            }
 
             return;
         }
@@ -651,15 +648,9 @@
         this.bso.b = 0;
         this.setBSO();
 
-        if (this.mode === MODE_PREF) {
-            name = prefTbl[this.qIDs[ this.curPos]].name;
-        } else {
-            name = prefTbl[this.qIDs[ this.curPos]].capital;
-        }
-
         this.d3.curPos.text(["[", this.curPos + 1, "/", this.prefsNum, "]  "].join(""));
 
-        this.d3.q.text([name, " はどこ？"].join(""));
+        this.d3.q.text([this.getName(), " はどこ？"].join(""));
     };
 
 
@@ -698,6 +689,23 @@
             this.d3["out-" + i]
                 .style("fill", color);
         }
+    };
+
+
+    JapanQuiz.prototype.getName = function (id) {
+        var name;
+
+        if (!id) {
+            id = this.qIDs[this.curPos];
+        }
+
+        if (this.mode === MODE_PREF) {
+            name = prefTbl[id].name;
+        } else {
+            name = prefTbl[id].capital;
+        }
+
+        return name;
     };
 
 
