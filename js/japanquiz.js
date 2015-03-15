@@ -362,7 +362,7 @@
 
 
     function clickGeography(geo, quiz) {
-        var i, x, y, kana, answerID, result;
+        var i, x, y, kana, answerID, result, clearPrevClickID = false;
 
         if (quiz.curPos >= quiz.prefsNum) {
             quiz.d3.msg.text(quiz.getName(geo.id));
@@ -423,6 +423,8 @@
             } else {
                 quiz.bso.o++;
 
+                clearPrevClickID = true;
+
                 if (quiz.bso.o < MAX_SKIPPABLE) {
                     quiz.nextQuestion();
                 } else {
@@ -432,7 +434,11 @@
             }
         }
 
-        quiz.prevClickPrefID = geo.id;
+        if (clearPrevClickID) {
+            quiz.prevClickPrefID = "";
+        } else {
+            quiz.prevClickPrefID = geo.id;
+        }
     }
 
 
