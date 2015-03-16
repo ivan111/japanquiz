@@ -14,16 +14,15 @@
         FLAG_W = 180,
         FLAG_H = 120,
 
+        BSO_BALL = 0,
+        BSO_STRIKE = 1,
+        BSO_OUT = 2,
+
         maruCX,
         maruCY,
 
         MAX_MISTAKABLE = 3,
         MAX_SKIPPABLE = 3,
-
-        COLOR_OFF = "#888",
-        COLOR_BSO_B = "#28CC8F",
-        COLOR_BSO_S = "#E9D912",
-        COLOR_BSO_O = "#E43E24",
 
         MODE_PREF = 0,
         DEFAULT_MODE = 0,
@@ -197,7 +196,7 @@
                 .style("fill", "#BC002D")
                 .on("click", function () {
                     if (quiz.curPos < quiz.prefsNum) {
-                        quiz.bso.b++;
+                        quiz.bso[BSO_BALL]++;
                         quiz.setBSO();
                     }
                 });
@@ -238,6 +237,8 @@
                 outY = ballY + 30,
                 ballR = 10;
 
+            quiz.$bso = [[0, 0, 0], [0, 0], [0, 0]];
+
             layer
                 .append("rect")
                 .attr("x", BSO_X)
@@ -250,65 +251,53 @@
 
             layer
                 .append("text")
+                .attr("class", "bso-text")
                 .attr("x", BSO_X + 10)
                 .attr("y", ballY)
-                .style("fill", "#FFF")
-                .style("font-size", "16px")
-                .style("font-weight", "bold")
                 .text("B");
 
             for (i = 0; i < 3; i++) {
-                quiz.d3["ball-" + i] = layer
+                quiz.$bso[BSO_BALL][i] = layer
                     .append("circle")
                     .attr("id", "bso-ball-" + i)
+                    .attr("class", "bso-off")
                     .attr("cx", BSO_X + 40 + (i * 25))
                     .attr("cy", ballY - (ballR / 2))
-                    .attr("r", ballR)
-                    .style("fill", "#FFF")
-                    .style("stroke", "#000")
-                    .style("stroke-width", 1);
+                    .attr("r", ballR);
             }
 
             layer
                 .append("text")
+                .attr("class", "bso-text")
                 .attr("x", BSO_X + 10)
                 .attr("y", strikeY)
-                .style("fill", "#FFF")
-                .style("font-size", "16px")
-                .style("font-weight", "bold")
                 .text("S");
 
             for (i = 0; i < 2; i++) {
-                quiz.d3["strike-" + i] = layer
+                quiz.$bso[BSO_STRIKE][i] = layer
                     .append("circle")
                     .attr("id", "bso-strike-" + i)
+                    .attr("class", "bso-off")
                     .attr("cx", BSO_X + 40 + (i * 25))
                     .attr("cy", strikeY - (ballR / 2))
-                    .attr("r", ballR)
-                    .style("fill", "#FFF")
-                    .style("stroke", "#000")
-                    .style("stroke-width", 1);
+                    .attr("r", ballR);
             }
 
             layer
                 .append("text")
+                .attr("class", "bso-text")
                 .attr("x", BSO_X + 10)
                 .attr("y", outY)
-                .style("fill", "#FFF")
-                .style("font-size", "16px")
-                .style("font-weight", "bold")
                 .text("O");
 
             for (i = 0; i < 2; i++) {
-                quiz.d3["out-" + i] = layer
+                quiz.$bso[BSO_OUT][i] = layer
                     .append("circle")
                     .attr("id", "bso-out-" + i)
+                    .attr("class", "bso-off")
                     .attr("cx", BSO_X + 40 + (i * 25))
                     .attr("cy", outY - (ballR / 2))
-                    .attr("r", ballR)
-                    .style("fill", "#FFF")
-                    .style("stroke", "#000")
-                    .style("stroke-width", 1);
+                    .attr("r", ballR);
             }
         });
 
@@ -362,10 +351,13 @@
 
 
     function clickGeography(geo, quiz) {
-        var i, x, y, kana, answerID, result, clearPrevClickID = false;
+        var i, x, y, kana, name, text, pref, answerID, result, clearPrevClickID = false;
+
+        name = quiz.getName(geo.id);
 
         if (quiz.curPos >= quiz.prefsNum) {
-            quiz.d3.msg.text(quiz.getName(geo.id));
+            quiz.d3.msg.text(name);
+            quiz.showTooltip(name);
 
             return;
         }
@@ -409,27 +401,41 @@
             }
 
             quiz.nextQuestion();
-        } else {
-            quiz.d3.msg.text(" そこは " + quiz.getName(geo.id));
 
-            quiz.bso.s++;
+            if (quiz.curPos < quiz.prefsNum) {
+                text = ["<span class=\"correct\">○</span>　", quiz.getName(), " <span class=\"usuku\">はどこ？</span>"].join("");
+                quiz.showTooltip(text);
+            } else {
+                quiz.showTooltip("<span class=\"correct\">○</span>　試合終了");
+            }
+        } else {
+            quiz.d3.msg.text(" そこは " + name);
+
+            quiz.bso[BSO_STRIKE]++;
             result.html(result.html() + "<span class=\"mistakes\">X</span>");
 
             quiz.d3.maru.attr("visibility", "hidden");
             quiz.d3.batsu.attr("visibility", "visible");
 
-            if (quiz.bso.s < MAX_MISTAKABLE) {
+            pref = "<span class=\"mistakes\">☓</span>　" + name;
+
+            if (quiz.bso[BSO_STRIKE] < MAX_MISTAKABLE) {
                 quiz.setBSO();
+                quiz.showTooltip(pref);
             } else {
-                quiz.bso.o++;
+                quiz.bso[BSO_OUT]++;
 
                 clearPrevClickID = true;
 
-                if (quiz.bso.o < MAX_SKIPPABLE) {
+                if (quiz.bso[BSO_OUT] < MAX_SKIPPABLE) {
                     quiz.nextQuestion();
+
+                    text = [pref, "　<span class=\"mistakes\">アウト</span>　", quiz.getName(), " <span class=\"usuku\">はどこ？</span>"].join("");
+                    quiz.showTooltip(text);
                 } else {
                     quiz.curPos = quiz.prefsNum + 1;
                     quiz.d3.q.text("スリーアウト チェンジ！");
+                    quiz.showTooltip(pref + "　スリーアウト チェンジ！");
                 }
             }
         }
@@ -624,6 +630,10 @@
             }
         });
 
+        this.d3.tooltip = d3.select("body").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+
         addQuestionPlugin(this.map, this);
         addFlagPlugin(this.map, this);
         addBaseBallPlugin(this.map, this);
@@ -650,8 +660,8 @@
             return;
         }
 
-        this.bso.s = 0;
-        this.bso.b = 0;
+        this.bso[BSO_STRIKE] = 0;
+        this.bso[BSO_BALL] = 0;
         this.setBSO();
 
         this.d3.curPos.text(["[", this.curPos + 1, "/", this.prefsNum, "]  "].join(""));
@@ -661,39 +671,16 @@
 
 
     JapanQuiz.prototype.setBSO = function () {
-        var i, color;
+        var i, k;
 
-        for (i = 0; i < 3; i++) {
-            if (i < this.bso.b) {
-                color = COLOR_BSO_B;
-            } else {
-                color = COLOR_OFF;
+        for (i = 0; i < this.$bso.length; i++) {
+            for (k = 0; k < this.$bso[i].length; k++) {
+                if (k < this.bso[i]) {
+                    this.$bso[i][k].attr("class", "bso-on-" + i);
+                } else {
+                    this.$bso[i][k].attr("class", "bso-off");
+                }
             }
-
-            this.d3["ball-" + i]
-                .style("fill", color);
-        }
-
-        for (i = 0; i < 2; i++) {
-            if (i < this.bso.s) {
-                color = COLOR_BSO_S;
-            } else {
-                color = COLOR_OFF;
-            }
-
-            this.d3["strike-" + i]
-                .style("fill", color);
-        }
-
-        for (i = 0; i < 2; i++) {
-            if (i < this.bso.o) {
-                color = COLOR_BSO_O;
-            } else {
-                color = COLOR_OFF;
-            }
-
-            this.d3["out-" + i]
-                .style("fill", color);
         }
     };
 
@@ -712,6 +699,31 @@
         }
 
         return name;
+    };
+
+
+    JapanQuiz.prototype.showTooltip = function (text) {
+        var quiz = this;
+
+        this.d3.tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+
+        this.d3.tooltip.html(text)
+            .style("left", (d3.event.pageX + 14) + "px")
+            .style("top", (d3.event.pageY - 14) + "px");
+
+        if (this.ttTimerID) {
+            window.clearTimeout(this.ttTimerID);
+        }
+
+        this.ttTimerID = window.setTimeout(function () {
+            quiz.d3.tooltip.transition()
+                .duration(200)
+                .style("opacity", 0);
+
+            this.ttTimerID = null;
+        }, 3000);
     };
 
 
@@ -757,7 +769,7 @@
         this.d3.maru.attr("visibility", "visible");
         this.d3.batsu.attr("visibility", "hidden");
 
-        this.bso = { b: 0, s: 0, o: 0 };
+        this.bso = [0, 0, 0];
         this.setBSO();
 
         this.curPos = -1;

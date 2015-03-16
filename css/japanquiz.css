@@ -20,6 +20,11 @@ div.panel {
 }
 
 
+span.usuku {
+    color: #888;
+}
+
+
 #container {
     width: 816px;
     margin: 0 auto;
@@ -71,4 +76,50 @@ td.td-pref {
 td.td-result {
     width: 3em;
     border-right: 2px solid black;
+}
+
+
+.bso-text {
+    fill: #FFF;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+
+.bso-off {
+    fill: #888;
+    stroke: #000;
+    stroke-width: .5px;
+}
+
+
+.bso-on-0 {
+    fill: #28CC8F;
+    stroke: #000;
+    stroke-width: .5px;
+}
+
+
+.bso-on-1 {
+    fill: #E9D912;
+    stroke: #000;
+    stroke-width: .5px;
+}
+
+
+.bso-on-2 {
+    fill: #E43E24;
+    stroke: #000;
+    stroke-width: .5px;
+}
+
+
+div.tooltip {
+    position: absolute;
+    padding: 3px;
+    font: 12px sans-serif;
+    background: #FFF;
+    border: 0px;
+    border-radius: 6px;
+    pointer-events: none;
 }
